@@ -1,0 +1,17 @@
+{
+    "name": "BionicLimb.UI",
+    "rootNamespace": "BionicLimb.UI",
+    "references": [
+        "BionicLimb.Core",
+        "BionicLimb.Classification"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

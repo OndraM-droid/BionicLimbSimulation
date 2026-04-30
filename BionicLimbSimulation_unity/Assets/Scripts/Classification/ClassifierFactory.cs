@@ -1,6 +1,6 @@
 using System.IO;
 using UnityEngine;
-using Unity.Sentis;
+
 
 namespace BionicLimb.Classification
 {
@@ -18,12 +18,12 @@ namespace BionicLimb.Classification
         /// </summary>
         public static IGestureClassifier Create(int windowSize, out string classifierMode)
         {
-            var modelAsset = Resources.Load<ModelAsset>("ML/GestureClassifier");
+            var modelAsset = Resources.Load<Unity.InferenceEngine.ModelAsset>("ML/GestureClassifier");
             if (modelAsset != null)
             {
                 try
                 {
-                    var ml = new MLGestureClassifier(modelAsset, windowSize);
+                    var ml = new MLGestureClassifier(modelAsset);
                     classifierMode = "ML Model";
                     Debug.Log("ClassifierFactory: Using ML gesture classifier (Sentis).");
                     return ml;

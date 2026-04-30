@@ -66,10 +66,10 @@ def extract_features(channels: np.ndarray, gesture_ids: np.ndarray, sample_rate:
 
 
 def train_and_export(csv_path: str, onnx_path: str):
+    import json
     from sklearn.neural_network import MLPClassifier
     from sklearn.model_selection import train_test_split
     from sklearn.preprocessing import StandardScaler
-    from sklearn.pipeline import Pipeline
     from skl2onnx import convert_sklearn
     from skl2onnx.common.data_types import FloatTensorType
 
@@ -83,31 +83,43 @@ def train_and_export(csv_path: str, onnx_path: str):
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42, stratify=y)
 
-    pipeline = Pipeline([
-        ("scaler", StandardScaler()),
-        ("clf", MLPClassifier(hidden_layer_sizes=(128, 64), activation="relu", max_iter=500, random_state=42))
-    ])
+    # Fit scaler separately so we can export MLP alone (Unity Sentis doesn't support ONNX Scaler op)
+    scaler = StandardScaler()
+    X_train_s = scaler.fit_transform(X_train)
+    X_test_s  = scaler.transform(X_test)
 
+    clf = MLPClassifier(hidden_layer_sizes=(128, 64), activation="relu", max_iter=500, random_state=42)
     print("Training...")
-    pipeline.fit(X_train, y_train)
-    acc = pipeline.score(X_test, y_test)
+    clf.fit(X_train_s, y_train)
+    acc = clf.score(X_test_s, y_test)
     print(f"  Test accuracy: {acc:.3f}")
 
-    print(f"Exporting to {onnx_path}...")
+    # Export ONLY the MLP (no scaler wrapper) — avoids unsupported ONNX Scaler operator
+    print(f"Exporting MLP to {onnx_path}...")
     n_features = X.shape[1]
     initial_type = [("float_input", FloatTensorType([None, n_features]))]
-    onnx_model = convert_sklearn(pipeline, initial_types=initial_type, target_opset=17)
+    onnx_model = convert_sklearn(clf, initial_types=initial_type, target_opset=17)
 
     os.makedirs(os.path.dirname(onnx_path) or ".", exist_ok=True)
     with open(onnx_path, "wb") as f:
         f.write(onnx_model.SerializeToString())
     print(f"  Saved: {onnx_path}")
 
+    # Export scaler parameters as JSON so C# can apply z-score normalization before inference
+    scaler_path = os.path.splitext(onnx_path)[0] + "_scaler.json"
+    scaler_data = {
+        "mean": scaler.mean_.tolist(),
+        "scale": scaler.scale_.tolist()
+    }
+    with open(scaler_path, "w") as f:
+        json.dump(scaler_data, f)
+    print(f"  Scaler saved: {scaler_path}")
+
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
     default_csv  = os.path.join(script_dir, "..", "..", "StreamingAssets", "SampleData", "synthetic_001.myo.csv")
-    default_onnx = os.path.join(script_dir, "..", "..", "ML", "GestureClassifier.onnx")
+    default_onnx = os.path.join(script_dir, "..", "..", "Resources", "ML", "GestureClassifier.onnx")
 
     csv_path  = sys.argv[1] if len(sys.argv) > 1 else default_csv
     onnx_path = sys.argv[2] if len(sys.argv) > 2 else default_onnx

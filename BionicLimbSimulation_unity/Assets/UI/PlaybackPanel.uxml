@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements">
+    <!--
+        PlaybackPanel.uxml
+        Bottom-left HUD overlay for the Bionic Limb Simulation playback system.
+        Spec §10.
+    -->
+    <ui:VisualElement name="PlaybackPanel"
+        style="position: absolute; bottom: 16px; left: 16px; width: 320px;
+               background-color: rgba(0,0,0,0.6); border-radius: 8px;
+               padding: 12px; flex-direction: column;">
+
+        <!-- Header row -->
+        <ui:Label name="GestureLabel" text="Gesture: —"
+            style="font-size: 18px; color: white; -unity-font-style: bold; margin-bottom: 4px;" />
+
+        <ui:Label name="ClassifierModeLabel" text="Classifier: —"
+            style="font-size: 11px; color: rgba(200,200,200,1); margin-bottom: 8px;" />
+
+        <!-- Progress bar -->
+        <ui:ProgressBar name="ProgressBar" value="0" high-value="1"
+            style="height: 8px; margin-bottom: 10px;" />
+
+        <!-- Transport controls row -->
+        <ui:VisualElement name="TransportRow"
+            style="flex-direction: row; align-items: center; margin-bottom: 8px;">
+
+            <ui:Button name="PrevStepButton" text="◀"
+                style="width: 36px; height: 32px; margin-right: 4px;" />
+
+            <ui:Button name="PlayPauseButton" text="▶"
+                style="flex-grow: 1; height: 32px; margin-right: 4px;" />
+
+            <ui:Button name="NextStepButton" text="▶▶"
+                style="width: 36px; height: 32px;" />
+        </ui:VisualElement>
+
+        <!-- Import button -->
+        <ui:Button name="ImportButton" text="Import .myo.csv"
+            style="height: 32px; margin-bottom: 8px;" />
+
+        <!-- Error message (hidden by default) -->
+        <ui:Label name="ErrorLabel" text=""
+            style="font-size: 11px; color: rgb(255,80,80); white-space: normal; display: none;" />
+
+    </ui:VisualElement>
+</ui:UXML>
