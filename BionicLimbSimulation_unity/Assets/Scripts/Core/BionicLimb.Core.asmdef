@@ -1,7 +1,10 @@
 {
     "name": "BionicLimb.Core",
     "rootNamespace": "BionicLimb.Core",
-    "references": [],
+    "references": [
+        "BionicLimb.Hand",
+        "BionicLimb.Classification"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

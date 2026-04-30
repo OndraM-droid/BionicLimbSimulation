@@ -2,7 +2,7 @@
     "name": "BionicLimb.Hand",
     "rootNamespace": "BionicLimb.Hand",
     "references": [
-        "BionicLimb.Core"
+        "BionicLimb.Classification"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c2aea7fe194af1045a3faabc1ac62fd9, type: 3}
   m_Name: GesturePoseLibrary
-  m_EditorClassIdentifier: Assembly-CSharp::BionicLimb.Hand.GesturePoseLibrary
+  m_EditorClassIdentifier: BionicLimb.Hand::BionicLimb.Hand.GesturePoseLibrary
   poses:
   - {fileID: 11400000, guid: b152b7b15aceaa7459bd7beae6bea229, type: 2}
   - {fileID: 11400000, guid: bd8a2e44b0c805341a321ccb7e8f99d7, type: 2}

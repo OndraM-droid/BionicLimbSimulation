@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 928552310899a6a4b9b7d9ab19624a2a, type: 3}
   m_Name: Pose_OpenHand
-  m_EditorClassIdentifier: Assembly-CSharp::BionicLimb.Hand.GesturePose
+  m_EditorClassIdentifier: BionicLimb.Hand::BionicLimb.Hand.GesturePose
   targetRotations:
   - {x: 0, y: 0, z: 0, w: 1}
   - {x: 0, y: 0, z: 0, w: 1}
