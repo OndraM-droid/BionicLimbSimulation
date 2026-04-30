@@ -19,8 +19,12 @@ namespace BionicLimb.Hand
         [Tooltip("14 local Quaternion rotations — one per phalanx, see BoneIndex enum.")]
         public Quaternion[] targetRotations = new Quaternion[BoneCount];
 
+        [Tooltip("CMC1 (Thumb_MC) saddle-joint rotation. X = flexion (0-50 deg), Y = abduction (0-40 deg). Spec §2.2")]
+        public Quaternion cmcRotation = Quaternion.identity;
+
         private void Reset()
         {
+            cmcRotation = Quaternion.identity;
             targetRotations = new Quaternion[BoneCount];
             for (int i = 0; i < BoneCount; i++)
                 targetRotations[i] = Quaternion.identity;
