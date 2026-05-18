@@ -1,19 +1,23 @@
 import * as THREE from 'three';
 import type { GesturePose } from './GesturePose.js';
 
-const SKIN_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xffcc99 });
+const SKIN_MATERIAL = new THREE.MeshStandardMaterial({
+  color: new THREE.Color(0.9, 0.7, 0.6),
+  roughness: 0.8,
+  metalness: 0.0,
+});
 
 export class HandRig {
   readonly bones: THREE.Bone[] = [];
   readonly rootBone: THREE.Bone;
-  readonly group: THREE.Group;
+  readonly skeleton: THREE.Skeleton;
+  readonly mesh: THREE.SkinnedMesh;
 
   private _targetRotations: THREE.Quaternion[] = [];
   private _currentRotations: THREE.Quaternion[] = [];
+  private readonly _scratchEuler = new THREE.Euler();
 
   constructor() {
-    this.group = new THREE.Group();
-
     const createBone = (name: string): THREE.Bone => {
       const bone = new THREE.Bone();
       bone.name = name;
@@ -72,15 +76,20 @@ export class HandRig {
       capsule.rotation.x = -Math.PI / 2;
       capsule.position.set(0, 0, length / 2);
       bone.add(capsule);
-      if (spec.parentIdx === -1) {
-        this.group.add(bone);
-      } else {
+      if (spec.parentIdx !== -1) {
         bones[spec.parentIdx].add(bone);
       }
     }
 
+    const skeleton = new THREE.Skeleton(bones);
+    const skinnedMesh = new THREE.SkinnedMesh(new THREE.BufferGeometry(), SKIN_MATERIAL);
+    skinnedMesh.add(bones[0]);
+    skinnedMesh.bind(skeleton);
+
     this.bones = bones;
     this.rootBone = bones[0];
+    this.skeleton = skeleton;
+    this.mesh = skinnedMesh;
 
     for (let i = 0; i < 14; i++) {
       this._targetRotations.push(new THREE.Quaternion());
@@ -117,8 +126,12 @@ export class HandRig {
 
   private _clampBoneRotationX(boneIdx: number, minDeg: number, maxDeg: number): void {
     const bone = this.bones[boneIdx];
-    const euler = new THREE.Euler().setFromQuaternion(bone.quaternion, 'XYZ');
-    euler.x = Math.max(THREE.MathUtils.degToRad(minDeg), Math.min(THREE.MathUtils.degToRad(maxDeg), euler.x));
-    bone.quaternion.setFromEuler(euler);
+    this._scratchEuler.setFromQuaternion(bone.quaternion, 'XYZ');
+    this._scratchEuler.x = THREE.MathUtils.clamp(
+      this._scratchEuler.x,
+      THREE.MathUtils.degToRad(minDeg),
+      THREE.MathUtils.degToRad(maxDeg)
+    );
+    bone.quaternion.setFromEuler(this._scratchEuler);
   }
 }

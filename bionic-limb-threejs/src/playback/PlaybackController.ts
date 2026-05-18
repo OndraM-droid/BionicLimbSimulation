@@ -43,10 +43,10 @@ export class PlaybackController extends EventTarget {
       this._accumulator = 0;
       this._currentStep = 0;
       this.state = 'Loaded';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     } catch (e) {
       this.state = 'Error';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
       throw e;
     }
   }
@@ -54,14 +54,14 @@ export class PlaybackController extends EventTarget {
   play(): void {
     if (this.state === 'Loaded' || this.state === 'Paused') {
       this.state = 'Playing';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     }
   }
 
   pause(): void {
     if (this.state === 'Playing') {
       this.state = 'Paused';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     }
   }
 
@@ -94,7 +94,7 @@ export class PlaybackController extends EventTarget {
       this._accumulator -= this._sampleInterval;
       if (this.currentSampleIndex >= this._buffer.sampleCount) {
         this.state = 'Paused';
-        this.dispatchEvent(new Event('stateChanged'));
+        this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
         break;
       }
     }
@@ -104,7 +104,7 @@ export class PlaybackController extends EventTarget {
     this._classifier.dispose();
     this._classifier = classifier;
     this.classifierMode = mode;
-    this.dispatchEvent(new Event('stateChanged'));
+    this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
   }
 
   private _processSample(index: number): void {
@@ -126,8 +126,8 @@ export class PlaybackController extends EventTarget {
         break;
       }
     }
-    const progress = this._buffer.sampleCount > 0 ? index / (this._buffer.sampleCount - 1) : 0;
-    this.dispatchEvent(new CustomEvent('gestureChanged', { detail: result }));
-    this.dispatchEvent(new CustomEvent('progressChanged', { detail: progress }));
+    const progress = this._buffer.sampleCount > 1 ? index / (this._buffer.sampleCount - 1) : 0;
+    this.dispatchEvent(new CustomEvent('gestureChanged', { detail: { result } }));
+    this.dispatchEvent(new CustomEvent('progressChanged', { detail: { progress } }));
   }
 }
