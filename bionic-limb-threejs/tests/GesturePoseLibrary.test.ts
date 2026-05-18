@@ -20,6 +20,16 @@ describe('GesturePoseLibrary', () => {
     expect(GesturePoseLibrary.gestureNames.length).toBe(8);
   });
 
+  it('gestureNames match spec exactly', () => {
+    expect(Array.from(GesturePoseLibrary.gestureNames)).toEqual([
+      'Rest', 'Fist', 'Open', 'PinchIndex', 'PinchMiddle', 'Point', 'ThumbUp', 'Victory',
+    ]);
+  });
+
+  it('gestureNames[0] === "Rest" (contract used by MLGestureClassifier initial state)', () => {
+    expect(GesturePoseLibrary.gestureNames[0]).toBe('Rest');
+  });
+
   it('BONE_COUNT === 14', () => {
     expect(BONE_COUNT).toBe(14);
   });

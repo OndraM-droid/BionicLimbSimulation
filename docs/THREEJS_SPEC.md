@@ -184,7 +184,9 @@ export class MyoFileParser {
 }
 ```
 
-**Required header keys** (same as Unity): `timestamp`, `ch1`, `ch2`, `ch3`, `ch4`, `ch5`, `ch6`, `ch7`, `ch8`, `gesture_id`, `gesture_name`
+**Required header keys**: `timestamp_ms`, `ch0`, `ch1`, `ch2`, `ch3`, `ch4`, `ch5`, `ch6`, `ch7`, `gesture_label`, `gesture_id`
+
+> **Note**: The column naming scheme was updated from the Unity convention (`timestamp`, `ch1–ch8`, `gesture_name`) to match the actual `.myo.csv` files produced by `GenerateSyntheticMyo.py` and `train_gesture_model.py`. The implementation, tests, and data files all use this naming.
 
 **Behaviour**:
 - Throws `Error('Missing header key: <key>')` for any missing column
@@ -202,7 +204,8 @@ export class EMGDataBuffer {
   readonly sampleCount: number;
   readonly channelCount: number;  // always 8
 
-  constructor(samples: MyoSample[]);
+  /** sampleRateHz is read by PlaybackController to compute the sample interval. */
+  constructor(samples: MyoSample[], sampleRateHz: number);
 
   /** Returns a copy of the channel values at the given index. */
   getSampleAt(index: number): Float32Array;
@@ -512,19 +515,24 @@ All Python tooling and generated artifacts are **unchanged**. Only the runtime c
 
 ---
 
-## 9. `.myo.csv` Format (unchanged)
+## 9. `.myo.csv` Format
 
 ```
-timestamp,ch1,ch2,ch3,ch4,ch5,ch6,ch7,ch8,gesture_id,gesture_name
-0.000,0.12,-0.34,0.05,0.78,-0.22,0.11,-0.45,0.33,1,Fist
-0.005,0.11,-0.33,0.06,0.77,-0.21,0.12,-0.44,0.34,1,Fist
+# FORMAT_VERSION,1.0
+# SAMPLE_RATE_HZ,200
+# NUM_CHANNELS,8
+timestamp_ms,ch0,ch1,ch2,ch3,ch4,ch5,ch6,ch7,gesture_label,gesture_id
+0.000,0.12,-0.34,0.05,0.78,-0.22,0.11,-0.45,0.33,Fist,1
+5.000,0.11,-0.33,0.06,0.77,-0.21,0.12,-0.44,0.34,Fist,1
 ...
 ```
 
-- `timestamp`: seconds from recording start
-- `ch1`–`ch8`: EMG channel amplitudes, expected range `[-1, 1]`, clamped on parse
+- `timestamp_ms`: milliseconds from recording start
+- `ch0`–`ch7`: EMG channel amplitudes (8 channels, zero-indexed), expected range `[-1, 1]`, clamped on parse
+- `gesture_label`: human-readable string label (matches `GesturePoseLibrary.gestureNames`)
 - `gesture_id`: integer 0–7
-- `gesture_name`: human-readable string label
+
+> **Note**: Comment lines beginning with `#` are metadata and are skipped by the parser.
 
 ---
 
