@@ -3,6 +3,7 @@ import { EMGDataBuffer } from '../core/EMGDataBuffer.js';
 import { EMGPreprocessor } from '../core/EMGPreprocessor.js';
 import type { IGestureClassifier, GestureResult } from '../classification/IGestureClassifier.js';
 import { RuleBasedClassifier } from '../classification/RuleBasedClassifier.js';
+import { WINDOW_SIZE } from '../core/constants.js';
 
 export type PlaybackState = 'Idle' | 'Loaded' | 'Playing' | 'Paused' | 'Error';
 
@@ -18,7 +19,6 @@ export class PlaybackController extends EventTarget {
   private _sampleInterval: number = 1 / 200;
   private _stepBoundaries: number[] = [];
   private _currentStep: number = 0;
-  private readonly WINDOW_SIZE = 40;
 
   constructor() {
     super();
@@ -120,14 +120,19 @@ export class PlaybackController extends EventTarget {
     const classifyInput = this.classifierMode === 'ML' ? windowFlat : features;
     const result = this._classifier.classify(classifyInput);
     this.currentResult = result;
-    for (let i = this._stepBoundaries.length - 1; i >= 0; i--) {
-      if (index >= this._stepBoundaries[i]) {
-        this._currentStep = i;
-        break;
-      }
-    }
+    this._currentStep = this._findCurrentStep(index);
     const progress = this._buffer.sampleCount > 1 ? index / (this._buffer.sampleCount - 1) : 0;
     this.dispatchEvent(new CustomEvent('gestureChanged', { detail: { result } }));
     this.dispatchEvent(new CustomEvent('progressChanged', { detail: { progress } }));
+  }
+
+  private _findCurrentStep(index: number): number {
+    let lo = 0, hi = this._stepBoundaries.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (this._stepBoundaries[mid] <= index) lo = mid;
+      else hi = mid - 1;
+    }
+    return lo;
   }
 }

@@ -2,6 +2,8 @@ import type { PlaybackController, PlaybackState } from '../playback/PlaybackCont
 import type { GestureResult } from '../classification/IGestureClassifier.js';
 
 export class PlaybackUI {
+  private _fileInput: HTMLInputElement;
+
   constructor(controller: PlaybackController) {
     const gestureLabel = document.getElementById('gesture-label')!;
     const classifierModeLabel = document.getElementById('classifier-mode-label')!;
@@ -17,6 +19,7 @@ export class PlaybackUI {
     fileInput.accept = '.csv';
     fileInput.style.display = 'none';
     document.body.appendChild(fileInput);
+    this._fileInput = fileInput;
 
     btnPlayPause.addEventListener('click', () => {
       if (controller.state === 'Playing') controller.pause();
@@ -59,5 +62,9 @@ export class PlaybackUI {
       btnPlayPause.textContent = state === 'Playing' ? '\u23F8' : '\u25B6';
       classifierModeLabel.textContent = controller.classifierMode;
     });
+  }
+
+  dispose(): void {
+    document.body.removeChild(this._fileInput);
   }
 }

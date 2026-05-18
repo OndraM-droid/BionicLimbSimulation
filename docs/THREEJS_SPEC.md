@@ -202,7 +202,8 @@ export class EMGDataBuffer {
   readonly sampleCount: number;
   readonly channelCount: number;  // always 8
 
-  constructor(samples: MyoSample[]);
+  /** sampleRateHz is read by PlaybackController to compute the sample interval. */
+  constructor(samples: MyoSample[], sampleRateHz: number);
 
   /** Returns a copy of the channel values at the given index. */
   getSampleAt(index: number): Float32Array;
