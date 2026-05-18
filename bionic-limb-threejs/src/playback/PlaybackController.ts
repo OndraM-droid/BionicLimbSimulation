@@ -109,9 +109,9 @@ export class PlaybackController extends EventTarget {
 
   private _processSample(index: number): void {
     if (!this._buffer) return;
-    const window = this._buffer.getWindowAt(index, this.WINDOW_SIZE);
-    const windowFlat = new Float32Array(this.WINDOW_SIZE * 8);
-    for (let i = 0; i < this.WINDOW_SIZE; i++) {
+    const window = this._buffer.getWindowAt(index, WINDOW_SIZE);
+    const windowFlat = new Float32Array(WINDOW_SIZE * 8);
+    for (let i = 0; i < WINDOW_SIZE; i++) {
       for (let c = 0; c < 8; c++) {
         windowFlat[i * 8 + c] = window[i][c];
       }

@@ -80,8 +80,8 @@ describe('PlaybackController integration', () => {
     });
     controller.update(1 / 200);
     expect(capturedProgress).not.toBeNull();
-    expect(capturedProgress as number).toBeGreaterThanOrEqual(0);
-    expect(capturedProgress as number).toBeLessThanOrEqual(1);
+    expect(capturedProgress as unknown as number).toBeGreaterThanOrEqual(0);
+    expect(capturedProgress as unknown as number).toBeLessThanOrEqual(1);
   });
 
   it('stateChanged event has detail.state as PlaybackState string', () => {
