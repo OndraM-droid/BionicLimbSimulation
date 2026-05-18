@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bionic Limb Simulator</title>
+    <link rel="stylesheet" href="/styles/panel.css" />
+  </head>
+  <body>
+    <div id="hud">
+      <div id="gesture-label">&#8212;</div>
+      <div id="classifier-mode-label">&#8212;</div>
+      <input type="range" id="progress-bar" min="0" max="100" value="0" disabled />
+      <div id="controls">
+        <button id="btn-prev-step">&#9664;</button>
+        <button id="btn-play-pause">&#9654;</button>
+        <button id="btn-next-step">&#9654;&#9654;</button>
+        <button id="btn-import">Import</button>
+      </div>
+      <div id="error-label" style="display:none;color:red;"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

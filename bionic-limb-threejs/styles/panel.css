@@ -1,0 +1,30 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; overflow: hidden; }
+#hud {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  background: rgba(0,0,0,0.6);
+  color: #eee;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  min-width: 260px;
+  z-index: 10;
+}
+#gesture-label { font-size: 18px; font-weight: bold; margin-bottom: 4px; }
+#classifier-mode-label { font-size: 11px; color: #aaa; margin-bottom: 8px; }
+#progress-bar { width: 100%; margin-bottom: 8px; }
+#controls { display: flex; gap: 6px; flex-wrap: wrap; }
+#controls button {
+  background: #333;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+#controls button:hover { background: #444; }
+#error-label { margin-top: 6px; font-size: 12px; }
