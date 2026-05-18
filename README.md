@@ -1,11 +1,52 @@
 # Bionic Limb Simulation
 
-A Unity 6 (URP) real-time EMG playback and gesture classification simulator for a bionic hand prosthetic. Load a `.myo.csv` EMG recording, watch it classified gesture-by-gesture, and see the procedural hand model mirror each predicted pose.
+A real-time EMG playback and gesture classification simulator for a bionic hand prosthetic.  
+Available as a **browser app** (Three.js) and a **Unity 6 (URP)** desktop application.
 
 ---
 
-## Requirements
+## 🌐 Browser App (Three.js)
 
+**Live demo → [OndraM-droid.github.io/BionicLimbSimulation](https://OndraM-droid.github.io/BionicLimbSimulation/)**
+
+No installation required — runs entirely in the browser using WebGL + WebAssembly.
+
+### Quick Start (local dev)
+
+```bash
+cd bionic-limb-threejs
+npm install
+npm run dev         # http://localhost:5173
+```
+
+### Run tests & build
+
+```bash
+npm test            # Vitest unit tests (27 specs)
+npm run build       # Production build → dist/
+```
+
+### Three.js app structure
+
+```
+bionic-limb-threejs/
+├── src/
+│   ├── core/           # MyoFileParser, EMGDataBuffer, EMGPreprocessor
+│   ├── hand/           # HandRig, GesturePoser, FingerController, GesturePoseLibrary
+│   ├── classification/ # IGestureClassifier, RuleBasedClassifier, MLGestureClassifier
+│   ├── playback/       # PlaybackController, PlaybackUI
+│   └── main.ts         # Bootstrap: Three.js scene, animation loop, auto-load CSV
+├── public/data/        # synthetic_001.myo.csv, GestureClassifier.onnx, _scaler.json
+└── tests/              # 5 Vitest test files
+```
+
+> Full specification: [`docs/THREEJS_SPEC.md`](docs/THREEJS_SPEC.md)
+
+---
+
+## Unity Desktop App
+
+## Requirements (Unity)
 | Dependency | Version |
 |---|---|
 | Unity | 6000.3.10f1 |
@@ -20,8 +61,7 @@ A Unity 6 (URP) real-time EMG playback and gesture classification simulator for 
 
 ---
 
-## Quick Start
-
+## Unity Quick Start
 ### 1. Open the project
 Open `BionicLimbSimulation_unity/` in Unity Hub with Unity 6000.3.10f1.  
 Unity will import packages from `Packages/manifest.json` automatically.
@@ -74,6 +114,12 @@ If the ONNX is not found at runtime, the system falls back to a rule-based class
 ---
 
 ## Running Tests
+
+### Three.js (browser app)
+
+```bash
+cd bionic-limb-threejs && npm test
+```
 
 ### In the Unity Editor
 Open **Window → General → Test Runner**.
