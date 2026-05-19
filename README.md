@@ -1,7 +1,7 @@
 # Bionic Limb Simulation
 
-A real-time EMG playback and gesture classification simulator for a bionic hand prosthetic.  
-Available as a **browser app** (Three.js) and a **Unity 6 (URP)** desktop application.
+A real-time EMG playback and gesture classification simulator for a bionic hand prosthetic,
+running entirely in the browser using Three.js + WebGL.
 
 ---
 
@@ -24,6 +24,7 @@ npm run dev         # http://localhost:5173
 ```bash
 npm test            # Vitest unit tests (27 specs)
 npm run build       # Production build → dist/
+npm run lint        # ESLint (TypeScript)
 ```
 
 ### Three.js app structure
@@ -32,142 +33,41 @@ npm run build       # Production build → dist/
 bionic-limb-threejs/
 ├── src/
 │   ├── core/           # MyoFileParser, EMGDataBuffer, EMGPreprocessor
-│   ├── hand/           # HandRig, GesturePoser, FingerController, GesturePoseLibrary
+│   ├── hand/           # HandRig, GesturePoser, FingerController, GesturePose, GesturePoseLibrary
 │   ├── classification/ # IGestureClassifier, RuleBasedClassifier, MLGestureClassifier
 │   ├── playback/       # PlaybackController, PlaybackUI
 │   └── main.ts         # Bootstrap: Three.js scene, animation loop, auto-load CSV
-├── public/data/        # synthetic_001.myo.csv, GestureClassifier.onnx, _scaler.json
-└── tests/              # 5 Vitest test files
+├── public/data/        # GestureClassifier_scaler.json  (place .myo.csv and .onnx here for ML)
+├── styles/             # CSS
+└── tests/              # 5 Vitest test files (27 specs)
 ```
 
 > Full specification: [`docs/THREEJS_SPEC.md`](docs/THREEJS_SPEC.md)
 
 ---
 
-## Unity Desktop App
-
-## Requirements (Unity)
-| Dependency | Version |
-|---|---|
-| Unity | 6000.3.10f1 |
-| Universal RP | 17.3 |
-| Unity Sentis (InferenceEngine) | 2.1.1 |
-| Animation Rigging | 1.3.1 |
-| ProBuilder | 6.0.5 |
-| Python | 3.9+ |
-| scikit-learn | ≥ 1.4 |
-| skl2onnx | ≥ 1.16 |
-| onnx | ≥ 1.14 |
-
----
-
-## Unity Quick Start
-### 1. Open the project
-Open `BionicLimbSimulation_unity/` in Unity Hub with Unity 6000.3.10f1.  
-Unity will import packages from `Packages/manifest.json` automatically.
-
-### 2. Open the scene
-`Assets/Scenes/SampleScene.unity`  
-Hit **Play** — the hand model and UI panel will appear.
-
-### 3. Load a recording
-Click **Import .myo.csv** in the bottom-left panel.  
-A sample recording is already included at `Assets/StreamingAssets/SampleData/synthetic_001.myo.csv`.
-
-### 4. Play / navigate
-- **▶ / ⏸** — play or pause playback at the original sample rate
-- **◀ / ▶▶** — jump to previous / next gesture transition
-- The progress bar and gesture label update in real-time
-
----
-
-## Generating Synthetic Data
-
-```bash
-cd BionicLimbSimulation_unity/Assets/Scripts/Tools
-python GenerateSyntheticMyo.py
-# Output: Assets/StreamingAssets/SampleData/synthetic_001.myo.csv
-```
-
-The script produces a 10-second, 200 Hz, 8-channel recording cycling through all 8 gestures.
-
----
-
-## Training the Gesture Model
-
-```bash
-# Install Python dependencies (one-time)
-pip install scikit-learn skl2onnx onnx numpy
-
-# Train and export
-cd BionicLimbSimulation_unity/Assets/Scripts/Tools
-python train_gesture_model.py
-```
-
-Outputs to `Assets/Resources/ML/`:
-- `GestureClassifier.onnx` — MLP classifier (128 × 64, ReLU)
-- `GestureClassifier_scaler.json` — z-score normalisation parameters
-
-The classifier extracts 32 time-domain features per window (MAV, RMS, ZCR, WL × 8 channels).  
-If the ONNX is not found at runtime, the system falls back to a rule-based classifier automatically.
-
----
-
 ## Running Tests
-
-### Three.js (browser app)
 
 ```bash
 cd bionic-limb-threejs && npm test
 ```
 
-### In the Unity Editor
-Open **Window → General → Test Runner**.
-
-- **EditMode** — fast, no scene required:
-  - `MyoFileParserTests` — header parsing, clamping, error paths
-  - `EMGPreprocessorTests` — pipeline output bounds and shape
-  - `RuleBasedClassifierTests` — gesture rule coverage, probability sums
-  - `GesturePoseLibraryTests` — ScriptableObject integrity
-- **PlayMode** — full pipeline over real frames:
-  - `PlaybackIntegrationTest` — load → play → pause → gesture output
-
-### From command line
-```bash
-"<path-to-Unity>" -runTests -testPlatform EditMode -projectPath BionicLimbSimulation_unity -testResults TestResults/editmode.xml -batchmode -nographics
-```
+| Test file | What it covers |
+|---|---|
+| `MyoFileParser.test.ts` | Header parsing, clamping, error paths |
+| `EMGPreprocessor.test.ts` | Pipeline output bounds and shape |
+| `RuleBasedClassifier.test.ts` | Gesture rule coverage, probability sums |
+| `GesturePoseLibrary.test.ts` | Pose library integrity |
+| `PlaybackIntegration.test.ts` | Load → play → pause → gesture output |
 
 ---
 
 ## Project Structure
 
 ```
-BionicLimbSimulation_unity/
-├── Assets/
-│   ├── ML/                        # Raw ONNX output (pre-Resources copy)
-│   ├── Resources/
-│   │   ├── ML/                    # GestureClassifier.onnx + _scaler.json (runtime)
-│   │   └── Poses/                 # GesturePoseLibrary + 8 GesturePose assets
-│   ├── Scenes/
-│   │   └── SampleScene.unity      # Main demo scene
-│   ├── Scripts/
-│   │   ├── Core/                  # MyoFileParser, EMGDataBuffer, EMGPreprocessor,
-│   │   │                          #   PlaybackController
-│   │   ├── Hand/                  # GesturePose, GesturePoseLibrary, HandRig,
-│   │   │                          #   GesturePoser, FingerController
-│   │   ├── Classification/        # IGestureClassifier, RuleBasedClassifier,
-│   │   │                          #   MLGestureClassifier, ClassifierFactory
-│   │   ├── UI/                    # PlaybackUI.cs
-│   │   └── Tools/                 # GenerateSyntheticMyo.py, train_gesture_model.py
-│   ├── StreamingAssets/
-│   │   └── SampleData/            # synthetic_001.myo.csv
-│   ├── Tests/
-│   │   ├── EditMode/              # Unit tests
-│   │   └── PlayMode/              # Integration tests
-│   └── UI/
-│       └── PlaybackPanel.uxml     # UI Toolkit layout
-└── Packages/
-    └── manifest.json
+BionicLimbSimulation/
+├── bionic-limb-threejs/   # Three.js browser app (this repo)
+└── docs/                  # Specification documents
 ```
 
 ---
@@ -209,6 +109,6 @@ Channel values are floats in `[-1, 1]`. Out-of-range values are clamped on impor
 ## Architecture Notes
 
 - **EMG pipeline**: band-pass (20–450 Hz, 4th-order Butterworth) → rectify → RMS envelope → z-score normalise
-- **Classification**: `ClassifierFactory` selects ML (ONNX via Sentis) if available, else rule-based fallback
-- **Playback timing**: accumulator-based (`accumulator += Time.deltaTime; while acc ≥ interval { advance }`) for sample-accurate replay
-- **Hand rig**: 14-bone hierarchy, Slerp blending at `poseBlendSpeed = 8`, ROM clamped per joint
+- **Classification**: `main.ts` attempts to load `MLGestureClassifier` (ONNX via `onnxruntime-web`); falls back to `RuleBasedClassifier` automatically
+- **Playback timing**: accumulator-based (`accumulator += delta; while acc ≥ sampleInterval { advance }`) for sample-accurate replay
+- **Hand rig**: 14-bone `THREE.Bone` hierarchy, lerp blending per finger joint, ROM clamped per joint
