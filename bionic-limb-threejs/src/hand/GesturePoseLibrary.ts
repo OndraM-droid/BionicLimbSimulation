@@ -30,8 +30,8 @@ function makeRotations(defs: { [boneIdx: number]: [number, number, number] }): T
 
 export class GesturePoseLibrary {
   static readonly gestureNames: readonly string[] = [
-    'rest', 'fist', 'open_hand', 'pinch_index', 'pinch_middle',
-    'point', 'thumb_up', 'victory'
+    'Rest', 'Fist', 'Open', 'PinchIndex', 'PinchMiddle',
+    'Point', 'ThumbUp', 'Victory',
   ];
 
   private _poses: GesturePose[];
@@ -39,7 +39,7 @@ export class GesturePoseLibrary {
   constructor() {
     this._poses = [
       {
-        name: 'rest',
+        name: 'Rest',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-20, 0, 0],
           [BoneIndex.Thumb_DP]:   [-10, 0, 0],
@@ -53,7 +53,7 @@ export class GesturePoseLibrary {
         })
       },
       {
-        name: 'fist',
+        name: 'Fist',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-80, 0, 0],
           [BoneIndex.Thumb_DP]:   [-60, 0, 0],
@@ -66,9 +66,9 @@ export class GesturePoseLibrary {
           [BoneIndex.Ring_PP]:    [-80, 0, 0],
         })
       },
-      { name: 'open_hand', rotations: makeRotations({}) },
+      { name: 'Open', rotations: makeRotations({}) },
       {
-        name: 'pinch_index',
+        name: 'PinchIndex',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-20, 0, 0],
           [BoneIndex.Thumb_DP]:   [-10, 0, 0],
@@ -82,7 +82,7 @@ export class GesturePoseLibrary {
         })
       },
       {
-        name: 'pinch_middle',
+        name: 'PinchMiddle',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-20, 0, 0],
           [BoneIndex.Thumb_DP]:   [-10, 0, 0],
@@ -96,7 +96,7 @@ export class GesturePoseLibrary {
         })
       },
       {
-        name: 'point',
+        name: 'Point',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-80, 0, 0],
           [BoneIndex.Thumb_DP]:   [-60, 0, 0],
@@ -107,7 +107,7 @@ export class GesturePoseLibrary {
         })
       },
       {
-        name: 'thumb_up',
+        name: 'ThumbUp',
         rotations: makeRotations({
           [BoneIndex.Thumb_MC]:   [0, 0, -20],
           [BoneIndex.Index_PP]:   [-80, 0, 0],
@@ -120,7 +120,7 @@ export class GesturePoseLibrary {
         })
       },
       {
-        name: 'victory',
+        name: 'Victory',
         rotations: makeRotations({
           [BoneIndex.Thumb_PP]:   [-80, 0, 0],
           [BoneIndex.Thumb_DP]:   [-60, 0, 0],

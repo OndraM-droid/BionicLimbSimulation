@@ -3,6 +3,7 @@ import { EMGDataBuffer } from '../core/EMGDataBuffer.js';
 import { EMGPreprocessor } from '../core/EMGPreprocessor.js';
 import type { IGestureClassifier, GestureResult } from '../classification/IGestureClassifier.js';
 import { RuleBasedClassifier } from '../classification/RuleBasedClassifier.js';
+import { WINDOW_SIZE } from '../core/constants.js';
 
 export type PlaybackState = 'Idle' | 'Loaded' | 'Playing' | 'Paused' | 'Error';
 
@@ -18,7 +19,6 @@ export class PlaybackController extends EventTarget {
   private _sampleInterval: number = 1 / 200;
   private _stepBoundaries: number[] = [];
   private _currentStep: number = 0;
-  private readonly WINDOW_SIZE = 40;
 
   constructor() {
     super();
@@ -43,10 +43,10 @@ export class PlaybackController extends EventTarget {
       this._accumulator = 0;
       this._currentStep = 0;
       this.state = 'Loaded';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     } catch (e) {
       this.state = 'Error';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
       throw e;
     }
   }
@@ -54,14 +54,14 @@ export class PlaybackController extends EventTarget {
   play(): void {
     if (this.state === 'Loaded' || this.state === 'Paused') {
       this.state = 'Playing';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     }
   }
 
   pause(): void {
     if (this.state === 'Playing') {
       this.state = 'Paused';
-      this.dispatchEvent(new Event('stateChanged'));
+      this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
     }
   }
 
@@ -94,7 +94,7 @@ export class PlaybackController extends EventTarget {
       this._accumulator -= this._sampleInterval;
       if (this.currentSampleIndex >= this._buffer.sampleCount) {
         this.state = 'Paused';
-        this.dispatchEvent(new Event('stateChanged'));
+        this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
         break;
       }
     }
@@ -104,14 +104,14 @@ export class PlaybackController extends EventTarget {
     this._classifier.dispose();
     this._classifier = classifier;
     this.classifierMode = mode;
-    this.dispatchEvent(new Event('stateChanged'));
+    this.dispatchEvent(new CustomEvent('stateChanged', { detail: { state: this.state } }));
   }
 
   private _processSample(index: number): void {
     if (!this._buffer) return;
-    const window = this._buffer.getWindowAt(index, this.WINDOW_SIZE);
-    const windowFlat = new Float32Array(this.WINDOW_SIZE * 8);
-    for (let i = 0; i < this.WINDOW_SIZE; i++) {
+    const window = this._buffer.getWindowAt(index, WINDOW_SIZE);
+    const windowFlat = new Float32Array(WINDOW_SIZE * 8);
+    for (let i = 0; i < WINDOW_SIZE; i++) {
       for (let c = 0; c < 8; c++) {
         windowFlat[i * 8 + c] = window[i][c];
       }
@@ -120,14 +120,19 @@ export class PlaybackController extends EventTarget {
     const classifyInput = this.classifierMode === 'ML' ? windowFlat : features;
     const result = this._classifier.classify(classifyInput);
     this.currentResult = result;
-    for (let i = this._stepBoundaries.length - 1; i >= 0; i--) {
-      if (index >= this._stepBoundaries[i]) {
-        this._currentStep = i;
-        break;
-      }
+    this._currentStep = this._findCurrentStep(index);
+    const progress = this._buffer.sampleCount > 1 ? index / (this._buffer.sampleCount - 1) : 0;
+    this.dispatchEvent(new CustomEvent('gestureChanged', { detail: { result } }));
+    this.dispatchEvent(new CustomEvent('progressChanged', { detail: { progress } }));
+  }
+
+  private _findCurrentStep(index: number): number {
+    let lo = 0, hi = this._stepBoundaries.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (this._stepBoundaries[mid] <= index) lo = mid;
+      else hi = mid - 1;
     }
-    const progress = this._buffer.sampleCount > 0 ? index / (this._buffer.sampleCount - 1) : 0;
-    this.dispatchEvent(new CustomEvent('gestureChanged', { detail: result }));
-    this.dispatchEvent(new CustomEvent('progressChanged', { detail: progress }));
+    return lo;
   }
 }

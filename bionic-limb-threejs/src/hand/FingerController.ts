@@ -23,7 +23,8 @@ export class FingerController {
 
   setAbduction(degrees: number): void {
     const rad = THREE.MathUtils.degToRad(degrees);
-    const euler = new THREE.Euler(0, rad, 0, 'XYZ');
+    const euler = new THREE.Euler().setFromQuaternion(this._proximal.quaternion, 'XYZ');
+    euler.y = rad;
     this._proximal.quaternion.setFromEuler(euler);
   }
 }

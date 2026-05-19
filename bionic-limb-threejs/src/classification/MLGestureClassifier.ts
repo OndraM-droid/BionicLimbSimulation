@@ -16,7 +16,7 @@ export class MLGestureClassifier implements IGestureClassifier {
     allProbs[0] = 1;
     this._lastResult = {
       gestureId: 0,
-      gestureName: 'rest',
+      gestureName: GesturePoseLibrary.gestureNames[0],
       confidence: 1,
       allProbabilities: allProbs
     };
@@ -24,7 +24,7 @@ export class MLGestureClassifier implements IGestureClassifier {
 
   static async create(modelUrl: string, scalerUrl: string): Promise<MLGestureClassifier> {
     const [session, scalerResponse] = await Promise.all([
-      ort.InferenceSession.create(modelUrl),
+      ort.InferenceSession.create(modelUrl, { executionProviders: ['webgl', 'wasm'] }),
       fetch(scalerUrl)
     ]);
     const scalerJson = await scalerResponse.json() as { mean: number[]; scale: number[] };
@@ -85,7 +85,8 @@ export class MLGestureClassifier implements IGestureClassifier {
         confidence: maxProb,
         allProbabilities: probs
       };
-    } catch (_e) {
+    } catch (e) {
+      console.warn('ONNX inference error:', e);
       // Keep last result on error
     }
   }

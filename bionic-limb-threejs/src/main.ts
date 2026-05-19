@@ -7,15 +7,18 @@ import { GesturePoser } from './hand/GesturePoser.js';
 import { MLGestureClassifier } from './classification/MLGestureClassifier.js';
 import { RuleBasedClassifier } from './classification/RuleBasedClassifier.js';
 import { PlaybackController } from './playback/PlaybackController.js';
-import { PlaybackUI } from './playback/PlaybackUI.js';
+import { PlaybackUI } from './ui/PlaybackUI.js';
 import type { GestureResult } from './classification/IGestureClassifier.js';
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+<<<<<<< HEAD
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.2;
+=======
+>>>>>>> 60130a46e3cba475bdc95affa192fd3edaaf476a
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -26,8 +29,8 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.001, 100);
-camera.position.set(0, 0.1, 0.35);
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 10);
+camera.position.set(0, 0.1, -0.35);
 camera.lookAt(0, 0.08, 0);
 
 const scene = new THREE.Scene();
@@ -42,6 +45,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0.08, 0);
 controls.update();
 
+<<<<<<< HEAD
 // Key light – warm
 const keyLight = new THREE.DirectionalLight(0xfff4e0, 2.5);
 keyLight.position.set(1.5, 2, 1);
@@ -60,9 +64,16 @@ scene.add(rimLight);
 
 // Ambient
 scene.add(new THREE.AmbientLight(0x404060, 0.5));
+=======
+const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+dirLight.position.set(0.64, 0.77, -0.26);
+dirLight.castShadow = true;
+scene.add(dirLight);
+scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+>>>>>>> 60130a46e3cba475bdc95affa192fd3edaaf476a
 
 const handRig = new HandRig();
-scene.add(handRig.group);
+scene.add(handRig.mesh);
 
 const library = new GesturePoseLibrary();
 const poser = new GesturePoser(handRig, library);
@@ -87,7 +98,7 @@ const controller = new PlaybackController();
 new PlaybackUI(controller);
 
 controller.addEventListener('gestureChanged', (e: Event) => {
-  const result = (e as CustomEvent<GestureResult>).detail;
+  const result = (e as CustomEvent<{ result: GestureResult }>).detail.result;
   poser.applyResult(result);
 });
 
