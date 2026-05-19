@@ -1,116 +1,119 @@
 import * as THREE from 'three';
 import type { GesturePose } from './GesturePose.js';
 
-// Dark gunmetal metallic shell – main finger/palm segments
+// Dark charcoal gunmetal shell – main finger/palm segments
 const SHELL_MATERIAL = new THREE.MeshStandardMaterial({
-  color: 0x1a1f2e,
+  color: 0x1c1c22,        // dark charcoal, almost black
+  metalness: 0.85,
+  roughness: 0.25,        // satin rather than mirror
+  envMapIntensity: 1.5,
+});
+
+// Darker antique gold/bronze accent pieces – knuckle strips, wrist band
+const ACCENT_MATERIAL = new THREE.MeshStandardMaterial({
+  color: 0x8a7340,        // darker antique gold/bronze
   metalness: 0.9,
-  roughness: 0.15,
+  roughness: 0.3,
   envMapIntensity: 1.0,
 });
 
-// Gold/brass accent pieces – knuckle guards, wrist ring
-const ACCENT_MATERIAL = new THREE.MeshStandardMaterial({
-  color: 0xb8960c,
-  metalness: 0.95,
-  roughness: 0.2,
-  envMapIntensity: 1.2,
+// Very dark near-black for joint gap areas
+const JOINT_MATERIAL = new THREE.MeshStandardMaterial({
+  color: 0x111116,
+  metalness: 0.6,
+  roughness: 0.5,
 });
 
-// Dark inner mechanical parts exposed at segment ends
-const INNER_MATERIAL = new THREE.MeshStandardMaterial({
-  color: 0x0d1117,
-  metalness: 0.7,
-  roughness: 0.4,
-});
-
-// Radius per bone index: MC=0.0065, PP=0.006, MP=0.0055, DP=0.005
-const BONE_RADII = [
-  0,       // 0: Hand_Root (palm handled separately)
-  0.0065,  // 1: Thumb_MC
-  0.006,   // 2: Thumb_PP
-  0.005,   // 3: Thumb_DP
-  0.0065,  // 4: Index_MC
-  0.006,   // 5: Index_PP
-  0.0055,  // 6: Index_MP
-  0.005,   // 7: Index_DP
-  0.0065,  // 8: Middle_MC
-  0.006,   // 9: Middle_PP
-  0.0055,  // 10: Middle_MP
-  0.005,   // 11: Middle_DP
-  0.0065,  // 12: Ring_MC
-  0.006,   // 13: Ring_PP
+// [width, height, length] per bone index for BoxGeometry segments (bones along Z axis)
+const BONE_DIMS: Array<[number, number, number]> = [
+  [0,      0,      0     ],  // 0: Hand_Root — handled by palm
+  [0.018,  0.012,  0.030 ],  // 1: Thumb_MC
+  [0.016,  0.011,  0.030 ],  // 2: Thumb_PP
+  [0.013,  0.009,  0.025 ],  // 3: Thumb_DP
+  [0.016,  0.013,  0.040 ],  // 4: Index_MC
+  [0.015,  0.012,  0.025 ],  // 5: Index_PP
+  [0.014,  0.011,  0.020 ],  // 6: Index_MP
+  [0.012,  0.009,  0.018 ],  // 7: Index_DP
+  [0.017,  0.014,  0.040 ],  // 8: Middle_MC
+  [0.016,  0.013,  0.030 ],  // 9: Middle_PP
+  [0.015,  0.011,  0.020 ],  // 10: Middle_MP
+  [0.013,  0.009,  0.018 ],  // 11: Middle_DP
+  [0.016,  0.012,  0.040 ],  // 12: Ring_MC
+  [0.015,  0.011,  0.035 ],  // 13: Ring_PP
 ];
 
 /**
  * Returns a group of meshes representing a single cyberpunk finger segment:
- * a tapered cylinder shell, a gold knuckle guard at the proximal end,
- * a flat dorsal panel, and a dark inner ring peeking out at the distal end.
+ * a faceted box phalange body, a dorsal bevel strip, a gold accent strip at the
+ * proximal joint, and a dark gap ring simulating the socket between segments.
  */
-function createBionicSegment(length: number, radius: number): THREE.Group {
+function createBionicSegment(length: number, w: number, h: number): THREE.Group {
   const group = new THREE.Group();
 
-  // Main tapered shell body aligned along +Z
-  const bodyGeo = new THREE.CylinderGeometry(radius * 0.8, radius * 0.9, length, 8);
+  // Main phalange body — box running along +Z, width=X height=Y depth=Z
+  const bodyGeo = new THREE.BoxGeometry(w, h, length * 0.88);
   const body = new THREE.Mesh(bodyGeo, SHELL_MATERIAL);
-  body.rotation.x = -Math.PI / 2;
-  body.position.set(0, 0, length / 2);
+  body.position.set(0, 0, length * 0.5);
   group.add(body);
 
-  // Gold knuckle guard at the proximal (joint) end
-  const knuckleGeo = new THREE.BoxGeometry(radius * 1.8, radius * 0.6, radius * 1.0);
-  const knuckle = new THREE.Mesh(knuckleGeo, ACCENT_MATERIAL);
-  knuckle.position.set(0, 0, 0);
-  group.add(knuckle);
+  // Dorsal bevel strip — slightly raised panel on top face (+Y)
+  const bevelGeo = new THREE.BoxGeometry(w * 0.7, h * 0.08, length * 0.75);
+  const bevel = new THREE.Mesh(bevelGeo, SHELL_MATERIAL);
+  bevel.position.set(0, h * 0.54, length * 0.5);
+  group.add(bevel);
 
-  // Flat dorsal panel on the back-of-hand side (+Y)
-  const dorsalGeo = new THREE.BoxGeometry(radius * 1.4, radius * 0.15, length * 0.7);
-  const dorsal = new THREE.Mesh(dorsalGeo, SHELL_MATERIAL);
-  dorsal.position.set(0, radius * 0.975, length / 2);
-  group.add(dorsal);
+  // Gold accent strip at the proximal joint (base of this segment)
+  const accentGeo = new THREE.BoxGeometry(w * 1.05, h * 0.18, 0.0015);
+  const accent = new THREE.Mesh(accentGeo, ACCENT_MATERIAL);
+  accent.position.set(0, 0, 0.001);
+  group.add(accent);
 
-  // Dark inner ring exposed at the distal end – suggests internal mechanics
-  const innerGeo = new THREE.CylinderGeometry(radius * 0.55, radius * 0.55, radius * 0.25, 6);
-  const inner = new THREE.Mesh(innerGeo, INNER_MATERIAL);
-  inner.rotation.x = -Math.PI / 2;
-  inner.position.set(0, 0, length);
-  group.add(inner);
+  // Dark joint gap ring at proximal end — simulates socket/gap between segments
+  const gapGeo = new THREE.BoxGeometry(w * 1.02, h * 1.02, 0.002);
+  const gap = new THREE.Mesh(gapGeo, JOINT_MATERIAL);
+  gap.position.set(0, 0, -0.001);
+  group.add(gap);
 
   return group;
 }
 
 /**
  * Returns the palm and wrist visuals attached to the root bone:
- * a dorsal palm plate, two gold accent lines simulating panel seams,
- * and a gold wrist cuff ring.
+ * a solid thick palm block, a raised dorsal centre panel, a gold knuckle seam,
+ * a thin gold wrist band, and a dark spacer behind it.
  */
 function createPalmVisual(): THREE.Group {
   const group = new THREE.Group();
 
-  // Main dorsal palm plate
-  const palmGeo = new THREE.BoxGeometry(0.06, 0.008, 0.055);
+  // Main palm body — solid thick block extending in +Z
+  const palmGeo = new THREE.BoxGeometry(0.072, 0.014, 0.058);
   const palm = new THREE.Mesh(palmGeo, SHELL_MATERIAL);
-  palm.position.set(-0.005, 0.004, 0.03);
+  palm.position.set(-0.002, 0, 0.030);
   group.add(palm);
 
-  // Gold accent seam – proximal row
-  const line1Geo = new THREE.BoxGeometry(0.058, 0.003, 0.002);
-  const line1 = new THREE.Mesh(line1Geo, ACCENT_MATERIAL);
-  line1.position.set(-0.005, 0.009, 0.02);
-  group.add(line1);
+  // Dorsal raised centre panel
+  const dorsalGeo = new THREE.BoxGeometry(0.050, 0.005, 0.044);
+  const dorsal = new THREE.Mesh(dorsalGeo, SHELL_MATERIAL);
+  dorsal.position.set(-0.002, 0.0095, 0.032);
+  group.add(dorsal);
 
-  // Gold accent seam – distal row
-  const line2Geo = new THREE.BoxGeometry(0.058, 0.003, 0.002);
-  const line2 = new THREE.Mesh(line2Geo, ACCENT_MATERIAL);
-  line2.position.set(-0.005, 0.009, 0.045);
-  group.add(line2);
+  // Gold accent seam across the knuckle line (distal edge of palm)
+  const knuckleSeamGeo = new THREE.BoxGeometry(0.070, 0.003, 0.0015);
+  const knuckleSeam = new THREE.Mesh(knuckleSeamGeo, ACCENT_MATERIAL);
+  knuckleSeam.position.set(-0.002, 0.008, 0.057);
+  group.add(knuckleSeam);
 
-  // Gold wrist cuff ring at the base of the hand
-  const cuffGeo = new THREE.CylinderGeometry(0.022, 0.024, 0.018, 16);
-  const cuff = new THREE.Mesh(cuffGeo, ACCENT_MATERIAL);
-  cuff.rotation.x = -Math.PI / 2;
-  cuff.position.set(0, 0, -0.005);
-  group.add(cuff);
+  // Thin gold wrist band (flat box, not a large cylinder)
+  const wristBandGeo = new THREE.BoxGeometry(0.046, 0.025, 0.006);
+  const wristBand = new THREE.Mesh(wristBandGeo, ACCENT_MATERIAL);
+  wristBand.position.set(0, 0, -0.003);
+  group.add(wristBand);
+
+  // Dark spacer between palm block and wrist band
+  const spacerGeo = new THREE.BoxGeometry(0.040, 0.020, 0.005);
+  const spacer = new THREE.Mesh(spacerGeo, JOINT_MATERIAL);
+  spacer.position.set(0, 0, -0.008);
+  group.add(spacer);
 
   return group;
 }
@@ -182,7 +185,8 @@ export class HandRig {
       if (spec.boneIdx === 0) {
         bone.add(createPalmVisual());
       } else {
-        bone.add(createBionicSegment(length, BONE_RADII[spec.boneIdx]));
+        const [bw, bh] = BONE_DIMS[spec.boneIdx];
+        bone.add(createBionicSegment(length, bw, bh));
       }
 
       if (spec.parentIdx !== -1) {

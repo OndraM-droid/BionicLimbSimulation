@@ -15,7 +15,7 @@ renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.2;
+renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
@@ -27,11 +27,11 @@ window.addEventListener('resize', () => {
 });
 
 const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.01, 10);
-camera.position.set(0, 0.1, -0.35);
-camera.lookAt(0, 0.08, 0);
+camera.position.set(0.08, 0.18, 0.28);
+camera.lookAt(0, 0.06, 0.04);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0a0e1a);
+scene.background = new THREE.Color(0xd0d0d0);
 
 // PMREMGenerator for environment map so MeshStandardMaterial reflects correctly
 const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -39,27 +39,27 @@ pmremGenerator.compileEquirectangularShader();
 scene.environment = pmremGenerator.fromScene(new RoomEnvironment()).texture;
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0.08, 0);
+controls.target.set(0, 0.06, 0.04);
 controls.update();
 
-// Key light – warm
-const keyLight = new THREE.DirectionalLight(0xfff4e0, 2.5);
-keyLight.position.set(1.5, 2, 1);
+// Key light — warm top-left
+const keyLight = new THREE.DirectionalLight(0xffffff, 3.0);
+keyLight.position.set(0.8, 1.5, 0.5);
 keyLight.castShadow = true;
 scene.add(keyLight);
 
-// Fill light – cool blue-ish
-const fillLight = new THREE.DirectionalLight(0xc0d8ff, 0.8);
-fillLight.position.set(-2, 0.5, -1);
+// Fill light — soft right side
+const fillLight = new THREE.DirectionalLight(0xe0eaff, 1.0);
+fillLight.position.set(-1.2, 0.3, 0.8);
 scene.add(fillLight);
 
-// Rim light
-const rimLight = new THREE.DirectionalLight(0xffffff, 1.0);
-rimLight.position.set(0, -1, -2);
+// Rim/back light — separates hand from background
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.6);
+rimLight.position.set(0, 0.5, -1.5);
 scene.add(rimLight);
 
-// Ambient
-scene.add(new THREE.AmbientLight(0x404060, 0.5));
+// Ambient — brighter for light background
+scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
 const handRig = new HandRig();
 scene.add(handRig.group);
