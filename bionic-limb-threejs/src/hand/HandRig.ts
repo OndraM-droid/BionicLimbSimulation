@@ -118,14 +118,15 @@ function createPalmVisual(): THREE.Group {
 export class HandRig {
   readonly bones: THREE.Bone[] = [];
   readonly rootBone: THREE.Bone;
-  readonly skeleton: THREE.Skeleton;
-  readonly mesh: THREE.SkinnedMesh;
+  readonly group: THREE.Group;
 
   private _targetRotations: THREE.Quaternion[] = [];
   private _currentRotations: THREE.Quaternion[] = [];
   private readonly _scratchEuler = new THREE.Euler();
 
   constructor() {
+    this.group = new THREE.Group();
+
     const createBone = (name: string): THREE.Bone => {
       const bone = new THREE.Bone();
       bone.name = name;
@@ -189,15 +190,10 @@ export class HandRig {
       }
     }
 
-    const skeleton = new THREE.Skeleton(bones);
-    const skinnedMesh = new THREE.SkinnedMesh(new THREE.BufferGeometry(), SHELL_MATERIAL);
-    skinnedMesh.add(bones[0]);
-    skinnedMesh.bind(skeleton);
+    this.group.add(bones[0]);
 
     this.bones = bones;
     this.rootBone = bones[0];
-    this.skeleton = skeleton;
-    this.mesh = skinnedMesh;
 
     for (let i = 0; i < 14; i++) {
       this._targetRotations.push(new THREE.Quaternion());

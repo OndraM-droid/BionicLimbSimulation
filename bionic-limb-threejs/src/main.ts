@@ -62,7 +62,7 @@ scene.add(rimLight);
 scene.add(new THREE.AmbientLight(0x404060, 0.5));
 
 const handRig = new HandRig();
-scene.add(handRig.mesh);
+scene.add(handRig.group);
 
 const library = new GesturePoseLibrary();
 const poser = new GesturePoser(handRig, library);
