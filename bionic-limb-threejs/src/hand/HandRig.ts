@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import type { GesturePose } from './GesturePose.js';
 
-<<<<<<< HEAD
 // Dark gunmetal metallic shell – main finger/palm segments
 const SHELL_MATERIAL = new THREE.MeshStandardMaterial({
   color: 0x1a1f2e,
@@ -115,13 +114,6 @@ function createPalmVisual(): THREE.Group {
 
   return group;
 }
-=======
-const SKIN_MATERIAL = new THREE.MeshStandardMaterial({
-  color: new THREE.Color(0.9, 0.7, 0.6),
-  roughness: 0.8,
-  metalness: 0.0,
-});
->>>>>>> 60130a46e3cba475bdc95affa192fd3edaaf476a
 
 export class HandRig {
   readonly bones: THREE.Bone[] = [];
@@ -185,7 +177,6 @@ export class HandRig {
       const bone = bones[spec.boneIdx];
       bone.position.set(spec.pos[0], spec.pos[1], spec.pos[2]);
       const length = boneLengths[spec.boneIdx];
-<<<<<<< HEAD
 
       if (spec.boneIdx === 0) {
         bone.add(createPalmVisual());
@@ -193,25 +184,13 @@ export class HandRig {
         bone.add(createBionicSegment(length, BONE_RADII[spec.boneIdx]));
       }
 
-      if (spec.parentIdx === -1) {
-        this.group.add(bone);
-      } else {
-=======
-      const capsule = new THREE.Mesh(
-        new THREE.CapsuleGeometry(0.007, length, 4, 8),
-        SKIN_MATERIAL
-      );
-      capsule.rotation.x = -Math.PI / 2;
-      capsule.position.set(0, 0, length / 2);
-      bone.add(capsule);
       if (spec.parentIdx !== -1) {
->>>>>>> 60130a46e3cba475bdc95affa192fd3edaaf476a
         bones[spec.parentIdx].add(bone);
       }
     }
 
     const skeleton = new THREE.Skeleton(bones);
-    const skinnedMesh = new THREE.SkinnedMesh(new THREE.BufferGeometry(), SKIN_MATERIAL);
+    const skinnedMesh = new THREE.SkinnedMesh(new THREE.BufferGeometry(), SHELL_MATERIAL);
     skinnedMesh.add(bones[0]);
     skinnedMesh.bind(skeleton);
 
