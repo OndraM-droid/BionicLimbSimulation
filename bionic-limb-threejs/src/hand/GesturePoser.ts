@@ -1,12 +1,12 @@
 import type { GestureResult } from '../classification/IGestureClassifier.js';
-import type { HandRig } from './HandRig.js';
+import type { IHandRig } from './IHandRig.js';
 import type { GesturePoseLibrary } from './GesturePoseLibrary.js';
 
 export class GesturePoser {
-  private _handRig: HandRig;
+  private _handRig: IHandRig;
   private _library: GesturePoseLibrary;
 
-  constructor(handRig: HandRig, library: GesturePoseLibrary) {
+  constructor(handRig: IHandRig, library: GesturePoseLibrary) {
     this._handRig = handRig;
     this._library = library;
   }

@@ -55,3 +55,7 @@ desktop.ini
 # !Assets/
 # !Packages/
 # !ProjectSettings/
+
+# Ignore large/source GLB files in repo root; allow the public model asset
+*.glb
+!bionic-limb-threejs/public/models/*.glb

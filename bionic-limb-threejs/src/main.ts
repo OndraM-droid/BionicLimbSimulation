@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { HandRig } from './hand/HandRig.js';
+import { GltfHandRig } from './hand/GltfHandRig.js';
 import { GesturePoseLibrary } from './hand/GesturePoseLibrary.js';
 import { GesturePoser } from './hand/GesturePoser.js';
 import { MLGestureClassifier } from './classification/MLGestureClassifier.js';
@@ -61,7 +61,7 @@ scene.add(rimLight);
 // Ambient — brighter for light background
 scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
-const handRig = new HandRig();
+const handRig = new GltfHandRig();
 scene.add(handRig.group);
 
 const library = new GesturePoseLibrary();
@@ -73,6 +73,9 @@ if (restPose) handRig.setTargetPose(restPose);
 const controller = new PlaybackController();
 
 (async () => {
+  // Load the robotic GLB model — falls back to procedural rig on any error
+  await handRig.load('/models/robotic_hand_white.glb');
+
   try {
     const mlClassifier = await MLGestureClassifier.create(
       '/data/GestureClassifier.onnx',

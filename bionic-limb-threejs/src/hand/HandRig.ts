@@ -1,24 +1,30 @@
 import * as THREE from 'three';
 import type { GesturePose } from './GesturePose.js';
+import type { IHandRig } from './IHandRig.js';
 
 // Dark charcoal gunmetal shell – main finger/palm segments
-const SHELL_MATERIAL = new THREE.MeshStandardMaterial({
-  color: 0x1c1c22,        // dark charcoal, almost black
-  metalness: 0.85,
-  roughness: 0.25,        // satin rather than mirror
+// Upgraded to MeshPhysicalMaterial for clearcoat gloss (Strategy D)
+const SHELL_MATERIAL = new THREE.MeshPhysicalMaterial({
+  color: 0x1c1c22,          // dark charcoal, almost black
+  metalness: 0.9,
+  roughness: 0.2,
+  clearcoat: 1.0,           // high-gloss lacquer layer
+  clearcoatRoughness: 0.08,
   envMapIntensity: 1.5,
 });
 
 // Darker antique gold/bronze accent pieces – knuckle strips, wrist band
-const ACCENT_MATERIAL = new THREE.MeshStandardMaterial({
-  color: 0x8a7340,        // darker antique gold/bronze
+const ACCENT_MATERIAL = new THREE.MeshPhysicalMaterial({
+  color: 0x8a7340,          // darker antique gold/bronze
   metalness: 0.9,
-  roughness: 0.3,
+  roughness: 0.25,
+  clearcoat: 0.3,
+  clearcoatRoughness: 0.2,
   envMapIntensity: 1.0,
 });
 
 // Very dark near-black for joint gap areas
-const JOINT_MATERIAL = new THREE.MeshStandardMaterial({
+const JOINT_MATERIAL = new THREE.MeshPhysicalMaterial({
   color: 0x111116,
   metalness: 0.6,
   roughness: 0.5,
@@ -118,7 +124,7 @@ function createPalmVisual(): THREE.Group {
   return group;
 }
 
-export class HandRig {
+export class HandRig implements IHandRig {
   readonly bones: THREE.Bone[] = [];
   readonly rootBone: THREE.Bone;
   readonly group: THREE.Group;
