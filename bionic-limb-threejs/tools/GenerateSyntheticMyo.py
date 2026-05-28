@@ -107,6 +107,8 @@ def generate_recording(
 
     emg_array shape: (n_total_samples, 8), dtype float32, values in [-1, 1].
     """
+    if duration_s <= 0:
+        raise ValueError(f"duration_s must be positive, got {duration_s}")
     rng = np.random.default_rng(seed)
     n_total = int(duration_s * SAMPLE_RATE_HZ)
 
